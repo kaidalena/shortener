@@ -1,14 +1,31 @@
-package main
+package server
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"io/ioutil"
 )
 
+type db_configuration struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	DBname   string `json:"dbname"`
+}
+
 const table_name string = `addresses`
+
+var db *sql.DB = nil
+
+func CheckError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
 
 func RunScript(db *sql.DB, filePath string) (interface{}, error) {
 	c, err := ioutil.ReadFile(filePath)
@@ -24,9 +41,26 @@ func ConnectDB(host, port, user, password, dbname string) (*sql.DB, error) {
 	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", psqlconn)
-	CheckError(err)
 
 	return db, err
+}
+
+func GetConn() *sql.DB {
+	if db == nil {
+		b_db_conf, err := ioutil.ReadFile("database/conf.json")
+		CheckError(err)
+
+		var db_conf db_configuration
+		err = json.Unmarshal(b_db_conf, &db_conf)
+		CheckError(err)
+
+		db, err = ConnectDB(db_conf.Host, db_conf.Port, db_conf.User, db_conf.Password, db_conf.DBname)
+		CheckError(err)
+
+		RunScript(db, "database/create.sql")
+	}
+
+	return db
 }
 
 func InsertUrls(db *sql.DB, long_url string, short_url string) error {

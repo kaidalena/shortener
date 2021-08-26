@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package shortener;
+
+option go_package = "./";
+
+service Shortener {
+    rpc Create(Request) returns (Response) {}
+    rpc Get   (Request) returns (Response) {}
+}
+
+message Request {
+    string input_url = 1;
+}
+
+message Response {
+    string target_url = 1;
+}
