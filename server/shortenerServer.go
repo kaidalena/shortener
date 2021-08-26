@@ -3,9 +3,10 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log"
 	"math/rand"
 	"net/url"
+	"test_Ozon_1/database"
 	"test_Ozon_1/proto"
 	"time"
 	"unicode/utf8"
@@ -15,7 +16,7 @@ type GRPCServer struct{}
 
 const (
 	letterBytes  = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
-	shortUrlSize = 10
+	ShortUrlSize = 10
 )
 
 func isValidUrl(longURL string) (*url.URL, bool) {
@@ -39,7 +40,7 @@ func (s *GRPCServer) Create(ctx context.Context, req *proto.Request) (*proto.Res
 		parse_url *url.URL
 		ok        bool
 	)
-	b := make([]byte, shortUrlSize)
+	b := make([]byte, ShortUrlSize)
 	length := utf8.RuneCountInString(letterBytes)
 
 	if parse_url, ok = isValidUrl(req.InputUrl); ok {
@@ -50,22 +51,22 @@ func (s *GRPCServer) Create(ctx context.Context, req *proto.Request) (*proto.Res
 		}
 
 		newUrl = parse_url.Scheme + "://" + parse_url.Host + "/" + string(b)
-		err = InsertUrls(GetConn(), req.InputUrl, newUrl)
+		err = database.InsertUrls(database.GetConn(), req.InputUrl, newUrl)
 
 		if err != nil {
-			newUrl, err = SearchByUrl(GetConn(), "long_url", req.InputUrl)
+			newUrl, err = database.SearchByUrl(database.GetConn(), "long_url", req.InputUrl)
 		}
 	} else {
 		err = errors.New("Invalid URL")
 	}
 
-	fmt.Printf("\nCreate:\n\tin = %v\n\tout = %v\n", req.InputUrl, newUrl)
+	log.Printf("Create:\n\tin = %v\n\tout = %v\n", req.InputUrl, newUrl)
 	return &proto.Response{TargetUrl: newUrl}, err
 }
 
 func (s *GRPCServer) Get(ctx context.Context, req *proto.Request) (*proto.Response, error) {
-	targetU, err := SearchByUrl(GetConn(), "short_url", req.GetInputUrl())
+	targetU, err := database.SearchByUrl(database.GetConn(), "short_url", req.GetInputUrl())
 
-	fmt.Printf("\nGet:\n\tin = %v\n\tout = %v\n", req.InputUrl, targetU)
+	log.Printf("Get:\n\tin = %v\n\tout = %v\n", req.InputUrl, targetU)
 	return &proto.Response{TargetUrl: targetU}, err
 }
