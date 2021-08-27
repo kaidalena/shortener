@@ -6,8 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"net/url"
-	"test_Ozon_1/database"
-	"test_Ozon_1/proto"
+	"shortener/database"
+	"shortener/proto"
 	"time"
 	"unicode/utf8"
 )

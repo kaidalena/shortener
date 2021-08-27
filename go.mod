@@ -1,4 +1,4 @@
-module test_Ozon_1
+module shortener
 
 go 1.17
 

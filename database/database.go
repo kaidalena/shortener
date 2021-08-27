@@ -2,20 +2,12 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"io/ioutil"
+	"shortener/conf"
 )
-
-type db_configuration struct {
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	DBname   string `json:"dbname"`
-}
 
 const table_name string = `addresses`
 
@@ -37,8 +29,8 @@ func RunScript(db *sql.DB, filePath string) (interface{}, error) {
 	return res, err
 }
 
-func ConnectDB(host, port, user, password, dbname string) (*sql.DB, error) {
-	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+func ConnectDB(host, user, password, dbname string, port int) (*sql.DB, error) {
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", psqlconn)
 
@@ -46,18 +38,10 @@ func ConnectDB(host, port, user, password, dbname string) (*sql.DB, error) {
 }
 
 func GetConn() *sql.DB {
+	var err error
 	if db == nil {
-		b_db_conf, err := ioutil.ReadFile("database/conf.json")
+		db, err = ConnectDB(conf.DB_conf.Host, conf.DB_conf.User, conf.DB_conf.Password, conf.DB_conf.DBname, conf.DB_conf.Port)
 		CheckError(err)
-
-		var db_conf db_configuration
-		err = json.Unmarshal(b_db_conf, &db_conf)
-		CheckError(err)
-
-		db, err = ConnectDB(db_conf.Host, db_conf.Port, db_conf.User, db_conf.Password, db_conf.DBname)
-		CheckError(err)
-
-		RunScript(db, "database/create.sql")
 	}
 
 	return db

@@ -5,11 +5,16 @@ import (
 	"flag"
 	"google.golang.org/grpc"
 	"log"
-	"test_Ozon_1/proto"
+	"os"
+	"shortener/proto"
 )
 
 func main() {
-	conn, err := grpc.Dial(":8080", grpc.WithInsecure())
+	server_ip, _ := os.LookupEnv("SERVER_HOST")
+	server_ip += ":8080"
+	log.Printf("Server ip = %s", server_ip)
+	log.Println("Client start")
+	conn, err := grpc.Dial(server_ip, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}

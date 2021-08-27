@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/url"
 	"regexp"
-	"test_Ozon_1/proto"
+	"shortener/proto"
 	"testing"
 )
 

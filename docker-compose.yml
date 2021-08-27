@@ -1,0 +1,65 @@
+version: "3.7"
+services:
+  db_cont:
+    image: postgres
+    container_name: db
+    networks:
+      new:
+        aliases:
+            - db_container
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+  migrate:
+    image: migrate/migrate
+    container_name: migrate
+    networks:
+      - new
+    volumes:
+      - ./database/migrations:/data/shortener/migrations
+    command: ["-path", "/data/shortener/migrations", "-database", "postgres://docker:docker_pwd@db_cont:5432/shortener?sslmode=disable", "up"]
+    depends_on:
+      - db_cont
+    links:
+      - db_cont
+  server:
+    container_name: server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - DB_HOST=db_cont
+    networks:
+      - new
+    ports:
+      - "8080:8080"
+    depends_on:
+      - migrate
+    links:
+      - db_cont
+    command: go run mainServer.go db_cont
+  client:
+    container_name: client
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_HOST=server
+    networks:
+      - new
+    ports:
+      - "8081:8081"
+    depends_on:
+      - server
+    links:
+      - server
+    command: go run mainClient.go http://test.org/yyyy/wwww
+volumes:
+  data:
+networks:
+  new:
