@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	server_ip, _ := os.LookupEnv("SERVER_HOST")
+	log.Println("------------------- Client start -------------------")
+    server_ip, _ := os.LookupEnv("SERVER_HOST")
 	server_ip += ":8080"
 	log.Printf("Server ip = %s", server_ip)
-	log.Println("Client start")
+	
 	conn, err := grpc.Dial(server_ip, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
@@ -34,6 +35,8 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("After Get:\nPassed in 'Get': %v\nResult 'Get': %v\n", shortU, res.TargetUrl)
+    
+    log.Println("------------------- Client stop -------------------")
 }
 
 func getCmdParam() string {

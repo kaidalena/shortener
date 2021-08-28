@@ -11,6 +11,8 @@ import (
 )
 
 func main() {
+    log.Println("------------------- Server start -------------------")
+    
 	database_ip, ok := os.LookupEnv("DB_HOST")
 	if ok {
 		conf.DB_conf.Host = database_ip
@@ -18,8 +20,6 @@ func main() {
 	} else {
 		log.Printf("Database host = %s", conf.DB_conf.Host)
 	}
-
-	log.Println("Server start")
 
 	s := grpc.NewServer()
 	srv := &server.GRPCServer{}
@@ -33,4 +33,6 @@ func main() {
 	if err := s.Serve(l); err != nil {
 		log.Fatal(err)
 	}
+    
+    log.Println("------------------- Server stop -------------------")
 }
