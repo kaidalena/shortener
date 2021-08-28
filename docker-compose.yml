@@ -17,6 +17,7 @@ services:
   migrate:
     image: migrate/migrate
     container_name: migrate
+    restart: on-failure
     networks:
       - new
     volumes:
@@ -32,6 +33,7 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
+    restart: on-failure
     environment:
       - DB_HOST=db_cont
     networks:
