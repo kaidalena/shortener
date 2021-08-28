@@ -42,7 +42,7 @@ services:
       - migrate
     links:
       - db_cont
-    command: go run mainServer.go db_cont
+    command: go run mainServer.go
   client:
     container_name: client
     build:

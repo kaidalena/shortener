@@ -11,6 +11,3 @@ RUN go get -u google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 RUN go get -u github.com/lib/pq@v1.10.2
 RUN go mod tidy
-
-#EXPOSE 8080
-
